@@ -4,28 +4,28 @@ export const tracks: Track[] = [
   {
     id: 1,
     title: "c2c",
-    audioFile: "/assets/audio/c2c.mp3",
+    audioFile: "https://boriceexposed.s3.us-east-1.amazonaws.com/stolimpico-xiv/c2c.mp3",
     coverArt: "/assets/images/cover_c2c.png",
     collectibleImage: "/assets/images/collectible_c2c.png"
   },
   {
     id: 2,
     title: "sayin",
-    audioFile: "/assets/audio/sayin.mp3",
+    audioFile: "https://boriceexposed.s3.us-east-1.amazonaws.com/stolimpico-xiv/sayin.mp3",
     coverArt: "/assets/images/cover_sayin.png",
     collectibleImage: "/assets/images/collectible_sayin.png"
   },
   {
     id: 3,
     title: "spaace",
-    audioFile: "/assets/audio/spaace.mp3",
+    audioFile: "https://boriceexposed.s3.us-east-1.amazonaws.com/stolimpico-xiv/spaace.mp3",
     coverArt: "/assets/images/cover_spaace.png",
     collectibleImage: "/assets/images/collectible_spaace.png"
   },
   {
     id: 4,
     title: "aimhigher",
-    audioFile: "/assets/audio/aimhigher.mp3",
+    audioFile: "https://boriceexposed.s3.us-east-1.amazonaws.com/stolimpico-xiv/aimhigher.mp3",
     coverArt: "/assets/images/cover_aimhigher.png",
     collectibleImage: "/assets/images/collectible_aimhigher.png"
   }

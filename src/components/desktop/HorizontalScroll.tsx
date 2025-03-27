@@ -1,11 +1,13 @@
 import { motion, useScroll, useAnimate, useTransform } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { tracks } from "../../data/tracks";
 import { TrackDisplay } from "./TrackDisplay";
 
 
 export const HorizontalScroll = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const trackGroupRef = useRef<HTMLDivElement>(null);
+  const [dragConstraints, setDragConstraints] = useState({ left: 0, right: 0 });
   
   const { scrollXProgress } = useScroll({
     container: containerRef,
@@ -21,31 +23,53 @@ export const HorizontalScroll = () => {
   );
 
   // Calculate drag constraints based on number of tracks
-  const dragConstraints = {
-    right: 0,
-    left: -((tracks.length - 1) * window.innerWidth)
-  };
+  // const dragConstraints = {
+  //   right: 0,
+  //   left: -((tracks.length - 1) * window.innerWidth)
+  // };
+
+  useLayoutEffect(() => {
+    const updateConstraints = () => {
+      if (trackGroupRef.current && containerRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const trackGroupWidth = trackGroupRef.current.scrollWidth;
+        
+        setDragConstraints({
+          right: 0,
+          left: -(trackGroupWidth - containerWidth)
+        });
+      }
+    };
+
+    updateConstraints();
+    // Add resize listener to update constraints when window size changes
+    window.addEventListener('resize', updateConstraints);
+    return () => window.removeEventListener('resize', updateConstraints);
+  }, []);
 
   return (
     <motion.div 
       ref={containerRef}
-      id="horizontal-scroll"
+      id="horizontal-scroll-container"
       className="h-full w-full flex overflow-x-auto scrollbar-hide"
       whileInView={{ x: [-100, 0] }}
       viewport={{ once: true }}
-      drag="x"
-      dragConstraints={dragConstraints}
-      dragElastic={0.1}
-      dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
-      whileDrag={{ cursor: "grabbing" }}
-      style={{ 
-        cursor: "grab",
-        overflowX: "scroll", // Changed from overflow-x-auto in className
-        touchAction: "pan-x",  // Enables touch scrolling
-        WebkitOverflowScrolling: "touch" // Smooth scrolling on iOS
-      }}
     >
-      <div className="flex flex-nowrap gap-8">
+      <motion.div 
+        ref={trackGroupRef}
+        id="track-group-wrapper"
+        className="flex flex-nowrap gap-8 w-full"
+        drag="x"
+        dragConstraints={dragConstraints}
+        dragElastic={0.1}
+        dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
+        whileDrag={{ cursor: "grabbing" }}
+        style={{ 
+          cursor: "grab",
+          touchAction: "pan-x",  // Enables touch scrolling
+          WebkitOverflowScrolling: "touch" // Smooth scrolling on iOS
+        }}
+      >
         {tracks.map((track, index) => (
           <motion.div 
             key={track.id}
@@ -67,7 +91,7 @@ export const HorizontalScroll = () => {
             />
           </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {/* Optional scroll progress indicator */}
       <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 text-white text-sm">

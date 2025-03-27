@@ -19,17 +19,21 @@ export const TrackCarousel = ({ tracks, onCollect, hasCollected }: TrackCarousel
       <CarouselContent id="carousel-content">
         {tracks.map((currentTrack, index) => (
           <CarouselItem key={index} id="carousel-item">
+            {/* If currentTrack is the full album (id: 99) then don't show Collect (& inventory?)
+             and show extended links instead of typical track display */}
             <TrackDisplay 
               track={currentTrack} 
               isActive={index === 0} 
               isMobile={true} 
             />
             {/* Claim Collectible */}
-            <Collect 
-              track={currentTrack}
-              onCollect={() => onCollect(currentTrack)}
-              hasCollected={() => hasCollected(currentTrack.id)}
-            />
+            {currentTrack.id !== 99 && ( 
+              <Collect 
+                track={currentTrack}
+                onCollect={() => onCollect(currentTrack)}
+                hasCollected={() => hasCollected(currentTrack.id)}
+              />
+            )}
           </CarouselItem>
         ))}
       </CarouselContent>
