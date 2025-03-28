@@ -85,6 +85,7 @@ export const HorizontalScroll = () => {
             style={{ opacity }}
           >
             <TrackDisplay 
+              toggleDrawer={() => {}}
               track={track} 
               isActive={true}
               isMobile={false}

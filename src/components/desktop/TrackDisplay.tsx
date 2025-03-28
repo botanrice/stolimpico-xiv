@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback, MouseEvent } from 'react';
 import { motion } from "framer-motion";
 import { useAudioPlayer } from "react-use-audio-player";
 import { Track } from '../../types';
+import { IconLinks } from '../../data/iconlinks';
 // import { useAudioPlayer } from '../../hooks/useAudioPlayer';
 import { useTrackProgress } from '../../hooks/useTrackProgress';
 
@@ -9,6 +10,7 @@ interface TrackDisplayProps {
   track: Track;
   isActive: boolean;
   isMobile: boolean;
+  toggleDrawer: () => void;
 }
 
 const CoverArt = ({ src, alt }: { src: string; alt: string }) => (
@@ -26,8 +28,8 @@ const CoverArt = ({ src, alt }: { src: string; alt: string }) => (
 )
 
 const LinkIcon = ({ src, alt, href, text }: { src: string; alt: string; href: string, text: string }) => (
-  <a className="flex flex-col justify-center items-center" href="#">
-    <img className="max-w-12 max-h-12" src="/assets/images/collectible_c2c.png" alt={alt} />
+  <a className="flex flex-col justify-center items-center" href={href} target="_blank" rel="noopener noreferrer">
+    <img className="max-w-12 max-h-12" src={src} alt={alt} />
     <span className="text-xs text-slate-200 italic underline">{text}</span>
   </a>
 )
@@ -49,47 +51,19 @@ const TrackInfo = ({ data }: { data: string[] }) => (
       animate={{ x: 0, opacity: 1 }}
       transition={{ delay: 0.2 }}
     >
+      {IconLinks.map((link) => (
         <LinkIcon 
-          src="/assets/images/collectible_c2c.png" 
-          alt="spotify-icon" 
-          href="https://soundcloud.com/stoicdapoet" 
-          text="Soundcloud" 
-        />
-        <LinkIcon 
-          src="/assets/images/collectible_c2c.png" 
-          alt="spotify-icon" 
-          href="https://open.spotify.com/artist/5IXHcQG5Sw0xYlRWuWEkL9" 
-          text="Spotify" 
-        />
-        <LinkIcon 
-          src="/assets/images/collectible_c2c.png" 
-          alt="apple-icon" 
-          href="https://music.apple.com/kz/artist/stoic-da-poet/1608739744" 
-          text="Apple" 
-        />
-        <LinkIcon 
-          src="/assets/images/collectible_c2c.png" 
-          alt="link-icon" 
-          href="https://stoicdapoet.bandcamp.com/track/svaoform" 
-          text="Bandcamp"
-        />
-        <LinkIcon 
-          src="/assets/images/collectible_c2c.png" 
-          alt="link-icon" 
-          href="https://www.youtube.com/watch?v=7OYfVrt1njY" 
-          text="YouTube"
-        />
-        <LinkIcon 
-          src="/assets/images/collectible_c2c.png" 
-          alt="link-icon" 
-          href="https://www.youtube.com/watch?v=7OYfVrt1njY" 
-          text="YouTube"
-        />
+          key={link.id}
+          src={link.icon} 
+          alt={link.name} 
+          href={link.url} 
+          text={link.name.charAt(0).toUpperCase() + link.name.slice(1)} />
+      ))}
     </motion.div>
   </>
 );
 
-export const TrackDisplay = ({ track, isActive, isMobile }: TrackDisplayProps) => {
+export const TrackDisplay = ({ track, isActive, isMobile, toggleDrawer }: TrackDisplayProps) => {
   const { togglePlayPause, seek, getPosition, play, pause, isPlaying, duration, error } = useAudioPlayer(track.audioFile);
   const [audioPosition, setAudioPosition] = useState(0);
   const frameRef = useRef<number>()
@@ -148,8 +122,12 @@ export const TrackDisplay = ({ track, isActive, isMobile }: TrackDisplayProps) =
   [duration, isPlaying, seek]
   )
 
-  const handleLeave = (entry: IntersectionObserverEntry | null) => {
-    entry ? console.log(entry.intersectionRect) : console.log("leaving view for track");
+  const handleEnter = () => {
+    track.id == 99 ? toggleDrawer() : null;
+  }
+
+  const handleLeave = () => {
+    track.id == 99 ? toggleDrawer() : null;
     pause(); // pause track on leaving
   }
   // if (duration === Infinity) console.log("oh no duration is infinity");
@@ -161,69 +139,84 @@ export const TrackDisplay = ({ track, isActive, isMobile }: TrackDisplayProps) =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      onViewportLeave={pause}
+      onViewportEnter={handleEnter}
+      onViewportLeave={handleLeave}
     >
-      {/* Cover Art */}
-      {/* <CoverArt src={track.coverArt} alt={`Artwork for ${track.title}`} /> */}
-
-      {/* Experimental Cover Art + Audio Player Combo Element 
-            - This element displays the cover art with a play button on top of it that controls
-            the audio player. 
-            - The cover art is completely rounded to the point of being nearly a circle.
-            - There is a progress bar to indicate the audio play progress that follows 
-            the outline of the circle. The progress bar completes the circle when the audio has finished.
-      */}
-      <div id="cover-art-audio-player" className="w-full md:max-w-[500px] md:pr-8 mb-4 md:mb-0">
-        <div className="relative w-full">
-          <motion.img
-            src={track.coverArt}
-            alt={`Artwork for ${track.title}`}
-            className="w-full rounded-full shadow-2xl"
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.2 }}
-          />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <button 
-              className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center text-xl"
-              onClick={handlePlayPause}
-            >
-              {isPlaying ? '⏸' : '▶'}
-            </button>
-          </div>
-        </div>
-        <div 
-          id="new-track-progress-bar"
-          className="flex-1 h-2 bg-gray-600 rounded-full cursor-pointer"
-          // className="block absolute w-[288px] h-[288px] overflow-hidden rounded-[125px] bg-gray-600 cursor-pointer"
-          ref={seekbarRef}
-          onClick={goTo}
+      {/* Show track title on top only on mobile */}
+      {/* <div id="track-info" className="text-center md:text-left pb-4">
+        {isMobile && (
+          <motion.h2 
+          className="text-3xl font-bold mb-1"
+          initial={{ x: 20, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
-          <motion.div 
-            className="h-full bg-white rounded-full"
-            style={{ width: `${(audioPosition / duration) * 100}%` }}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <div id="track-time-tracking" className="text-sm text-gray-400">
-            {formatTime(audioPosition)} / {formatTime(duration)}
-          </div>
-        </div>
-      </div>
-
-
-      {/* <div id="cover-art-wrap" className="w-full md:max-w-[500px] md:pr-8 mb-4 md:mb-0">
-        <motion.img
-          src={track.coverArt} alt={`Artwork for ${track.title}`}
-          className="w-full rounded-lg shadow-2xl"
-          whileHover={{ scale: 1.02 }}
-          transition={{ duration: 0.2 }}
-        />
+          {track.title}
+        </motion.h2>
+        )}
       </div> */}
+      
+      {/* Cover Art */}
+      {track.id == 99 ? (
+        <CoverArt src={track.coverArt} alt={`Artwork for ${track.title}`} />
+      ) : (
+        <motion.div id="cover-art-audio-player" 
+          className="w-full md:max-w-[500px] md:pr-8 mb-4 md:mb-0"
+        >
+          <div className="relative w-full">
+            <motion.img
+              src={track.coverArt}
+              alt={`Artwork for ${track.title}`}
+              className="w-full rounded-full md:rounded-none shadow-2xl"
+              initial={{ rotate: 0 }}
+              whileInView={{ 
+                rotate: (isMobile ? 360 : 0),
+                transition: isMobile ? { duration: 200, repeat: Infinity, ease: [.17,.67,.83,.67] } : {}
+              }}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+            />
+            {isMobile && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button 
+                  className="w-28 h-28 rounded-full bg-[#cbcbcbba] text-black flex items-center justify-center text-xl"
+                  onClick={handlePlayPause}
+                >
+                  {isPlaying ? '⏸' : '▶'}
+                </button>
+              </div>
+            )}
+          </div>
+          {/* Mobile Audio Progress Bar */}
+          {isMobile && (
+            <>
+            <div 
+              id="new-track-progress-bar"
+              className="flex-1 h-2 bg-gray-600 rounded-full cursor-pointer"
+              // className="block absolute w-[288px] h-[288px] overflow-hidden rounded-[125px] bg-gray-600 cursor-pointer"
+              ref={seekbarRef}
+              onClick={goTo}
+            >
+              <motion.div 
+                className="h-full bg-white rounded-full"
+                style={{ width: `${(audioPosition / duration) * 100}%` }}
+              />
+            </div>
+            {/* <div className="flex items-center justify-between">
+              <div id="track-time-tracking" className="text-sm text-gray-400">
+                {formatTime(audioPosition)} / {formatTime(duration)}
+              </div>
+            </div> */}
+            </>
+          )}
+        </motion.div>
+      )}
 
       {/* Track Info */}
       <div id="track-info-wrap" className="w-full md:w-1/2 md:pl-8">
         <div id="track-info" className="text-center md:text-left">
-          <motion.h2 
+          {!isMobile && track.id != 99 && (
+            <motion.h2 
             className="text-3xl font-bold mb-1"
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
@@ -231,50 +224,47 @@ export const TrackDisplay = ({ track, isActive, isMobile }: TrackDisplayProps) =
           >
             {track.title}
           </motion.h2>
+          )}
           {(track.id == 99) && (
-            <TrackInfo data={["hi", "there"]} />
+            <TrackInfo data={[]} />
           )}
         </div>
 
         {/* BEN Audio Player */}
-        {/* {track.id != 99 && (
+        {(!isMobile && track.id != 99) && (
           <div id="track-player" className="mt-4">
-            <audio ref={audioRef} src={track.audioFile} />
+            {/* <audio ref={audioRef} src={track.audioFile} /> */}
             
             <div className="flex gap-4 justify-between items-center bg-gray-800 rounded-lg p-4">
               <div id="track-play-button" className="flex items-center justify-between">
                 <button
                   className="w-12 h-12 rounded-full bg-white text-black 
                             flex items-center justify-center text-xl"
-                  onClick={togglePlay}
+                  onClick={togglePlayPause}
                 >
-                  {audioState.isPlaying ? '⏸' : '▶'}
+                  {isPlaying ? '⏸' : '▶'}
                 </button>
               </div>
               <div 
                 id="track-progress-bar"
                 className="flex-1 h-2 bg-gray-600 rounded-full cursor-pointer"
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const x = e.clientX - rect.left;
-                  const percentage = (x / rect.width) * 100;
-                  seek((percentage / 100) * audioState.duration);
-                }}
+                onClick={goTo}
+                ref={seekbarRef}
               >
                 <motion.div 
                   className="h-full bg-white rounded-full"
-                  style={{ width: `${audioState.progress}%` }}
+                  style={{ width: `${(audioPosition / duration) * 100}%`  }}
                 />
               </div>
 
               <div className="flex items-center justify-between">
                 <div id="track-time-tracking" className="text-sm text-gray-400">
-                  {formatTime(audioState.currentTime)} / {formatTime(audioState.duration)}
+                  {formatTime(audioPosition)} / {formatTime(duration)}
                 </div>
               </div>
             </div>
           </div>
-        )} */}
+        )} 
 
       </div>
     </motion.div>

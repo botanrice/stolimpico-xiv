@@ -1,7 +1,6 @@
 import { Switch } from "radix-ui";
 import { useState, useEffect } from "react";
 import { Track } from "../../types";
-import { useInventory } from "../../hooks/useInventory";
 import "../../styles/components.css";
 
 interface CollectProps {
@@ -11,11 +10,11 @@ interface CollectProps {
 }
 
 export const Collect = ({ track, onCollect, hasCollected }: CollectProps) => {
-  const [text, setText] = useState("claim");
+  const [text, setText] = useState(hasCollected(track.id) ? "claimed" : "tap to claim");
 
   const handleCheckedChange = (checked: boolean) => {
     onCollect(track);
-    setText(checked ? "claimed" : "claim");
+    setText(checked ? "claimed" : "tap to claim");
   };
 
   return (
@@ -25,6 +24,7 @@ export const Collect = ({ track, onCollect, hasCollected }: CollectProps) => {
           className="CollectSwitch"
           checked={hasCollected(track.id)}
           onCheckedChange={handleCheckedChange}
+          disabled={hasCollected(track.id)}
         >
           <Switch.Thumb className="CollectThumb" />
           <p className="CollectText">{text.toUpperCase()}</p>

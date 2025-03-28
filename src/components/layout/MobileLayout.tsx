@@ -9,6 +9,7 @@ import { InventoryDrawer } from '../mobile/InventoryDrawer';
 
 export const MobileLayout = () => {
   const { hasCollected, addToInventory, clearInventory } = useInventory();
+  const [showingAlbumMobile, setShowingAlbumMobile] = useState(true);
 
   // const [hasListened, setHasListened] = useState(false);
   // const handleAudioComplete = () => {
@@ -21,8 +22,11 @@ export const MobileLayout = () => {
         tracks={allTracks} 
         onCollect={addToInventory}
         hasCollected={hasCollected}
+        toggleDrawer={() => setShowingAlbumMobile(!showingAlbumMobile)}
       />
+      {/* Hide InventoryDrawer when track id is 99 */}
       <InventoryDrawer 
+        show={showingAlbumMobile}
         inventory={allTracks}
         hasCollected={hasCollected}
         clearInventory={clearInventory}
