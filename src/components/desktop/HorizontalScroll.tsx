@@ -86,8 +86,7 @@ export const HorizontalScroll = () => {
           >
             <TrackDisplay 
               toggleDrawer={() => {}}
-              track={track} 
-              isActive={true}
+              track={track}
               isMobile={false}
             />
           </motion.div>

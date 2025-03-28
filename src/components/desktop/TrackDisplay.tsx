@@ -2,13 +2,11 @@ import { useState, useEffect, useRef, useCallback, MouseEvent } from 'react';
 import { motion } from "framer-motion";
 import { useAudioPlayer } from "react-use-audio-player";
 import { Track } from '../../types';
-import { IconLinks } from '../../data/iconlinks';
-// import { useAudioPlayer } from '../../hooks/useAudioPlayer';
-import { useTrackProgress } from '../../hooks/useTrackProgress';
+import { TrackInfoLinks } from '../common/TrackInfoLinks';
+import { LinkIcon } from '../common/LinkIcon';
 
 interface TrackDisplayProps {
   track: Track;
-  isActive: boolean;
   isMobile: boolean;
   toggleDrawer: () => void;
 }
@@ -27,43 +25,7 @@ const CoverArt = ({ src, alt }: { src: string; alt: string }) => (
   </>
 )
 
-const LinkIcon = ({ src, alt, href, text }: { src: string; alt: string; href: string, text: string }) => (
-  <a className="flex flex-col justify-center items-center" href={href} target="_blank" rel="noopener noreferrer">
-    <img className="max-w-12 max-h-12" src={src} alt={alt} />
-    <span className="text-xs text-slate-200 italic underline">{text}</span>
-  </a>
-)
-
-const TrackInfo = ({ data }: { data: string[] }) => (
-  <>
-    <motion.p 
-      className="text-sm italic mb-1"
-      initial={{ x: 20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      leverson, stoic da poet
-    </motion.p>
-    <motion.div
-      id="link-icon-container" 
-      className="w-full grid grid-cols-3 gap-y-2 pt-4 pb-0"
-      initial={{ x: 20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      {IconLinks.map((link) => (
-        <LinkIcon 
-          key={link.id}
-          src={link.icon} 
-          alt={link.name} 
-          href={link.url} 
-          text={link.name.charAt(0).toUpperCase() + link.name.slice(1)} />
-      ))}
-    </motion.div>
-  </>
-);
-
-export const TrackDisplay = ({ track, isActive, isMobile, toggleDrawer }: TrackDisplayProps) => {
+export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProps) => {
   const { togglePlayPause, seek, getPosition, play, pause, isPlaying, duration, error } = useAudioPlayer(track.audioFile);
   const [audioPosition, setAudioPosition] = useState(0);
   const frameRef = useRef<number>()
@@ -142,29 +104,14 @@ export const TrackDisplay = ({ track, isActive, isMobile, toggleDrawer }: TrackD
       onViewportEnter={handleEnter}
       onViewportLeave={handleLeave}
     >
-      {/* Show track title on top only on mobile */}
-      {/* <div id="track-info" className="text-center md:text-left pb-4">
-        {isMobile && (
-          <motion.h2 
-          className="text-3xl font-bold mb-1"
-          initial={{ x: 20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-        >
-          {track.title}
-        </motion.h2>
-        )}
-      </div> */}
-      
       {/* Cover Art */}
       {track.id == 99 ? (
         <CoverArt src={track.coverArt} alt={`Artwork for ${track.title}`} />
       ) : (
-        <motion.div id="cover-art-audio-player" 
-          className="w-full md:max-w-[500px] md:pr-8 mb-4 md:mb-0"
-        >
+        <motion.div id="cover-art-audio-player" className="w-full md:max-w-[500px] md:pr-8 mb-4 md:mb-0">
           <div className="relative w-full">
             <motion.img
+              id="cover-art-img"
               src={track.coverArt}
               alt={`Artwork for ${track.title}`}
               className="w-full rounded-full md:rounded-none shadow-2xl"
@@ -213,22 +160,44 @@ export const TrackDisplay = ({ track, isActive, isMobile, toggleDrawer }: TrackD
       )}
 
       {/* Track Info */}
-      <div id="track-info-wrap" className="w-full md:w-1/2 md:pl-8">
-        <div id="track-info" className="text-center md:text-left">
-          {!isMobile && track.id != 99 && (
+      <div id="track-info-wrap" className="w-full md:w-1/2 md:pl-8 md:flex md:flex-col md:gap-8">
+        {!isMobile && track.id != 99 && (
+          <div className="w-full">
             <motion.h2 
-            className="text-3xl font-bold mb-1"
-            initial={{ x: 20, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 0.2 }}
-          >
-            {track.title}
-          </motion.h2>
-          )}
-          {(track.id == 99) && (
-            <TrackInfo data={[]} />
-          )}
-        </div>
+              className="text-3xl font-bold mb-1"
+              initial={{ x: 20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+            >
+              {track.title}
+            </motion.h2>
+          </div>
+        )}
+        {!isMobile && track.id != 99 && (
+          <div className="grid grid-cols-3 gap-4">
+            <LinkIcon 
+              src="public/assets/images/icons/youtube.png" 
+              alt="youtube-link" 
+              href="https://youtube.com"
+              text="YouTube"
+            />
+            <LinkIcon 
+              src="public/assets/images/icons/youtube.png" 
+              alt="youtube-link" 
+              href="https://youtube.com"
+              text="YouTube"
+            />
+            <LinkIcon 
+              src="public/assets/images/icons/youtube.png" 
+              alt="youtube-link" 
+              href="https://youtube.com"
+              text="YouTube"
+            />
+          </div>
+        )}
+        {(track.id == 99) && (
+          <TrackInfoLinks />
+        )}
 
         {/* BEN Audio Player */}
         {(!isMobile && track.id != 99) && (

@@ -4,6 +4,7 @@ import { allTracks } from '../../data/tracks';
 import { TrackCarousel } from '../mobile/TrackCarousel';
 import { useInventory } from '../../hooks/useInventory';
 import { InventoryDrawer } from '../mobile/InventoryDrawer';
+import '../../styles/components.css';
 // import { Track } from '../../types';
 // import { AudioPlayer } from '../common/AudioPlayer';
 
@@ -17,14 +18,21 @@ export const MobileLayout = () => {
   // };
 
   return (
-    <div id="mobile-layout" className="flex flex-col justify-between items-center w-screen h-screen pt-6 bg-black text-white overflow-hidden">
+    <div id="mobile-layout" className="GradientBkg flex flex-col justify-between items-center w-screen h-screen pt-6 bg-black text-white overflow-hidden">
+      {/* <motion.div 
+        className="text-white text-xs italic mb-2"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: 0 }}
+        transition={{ duration: 5, delay: 2 }}
+      >
+        <p className="m-0">swipe to explore</p>
+      </motion.div> */}
       <TrackCarousel 
         tracks={allTracks} 
         onCollect={addToInventory}
         hasCollected={hasCollected}
         toggleDrawer={() => setShowingAlbumMobile(!showingAlbumMobile)}
       />
-      {/* Hide InventoryDrawer when track id is 99 */}
       <InventoryDrawer 
         show={showingAlbumMobile}
         inventory={allTracks}

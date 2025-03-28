@@ -22,7 +22,6 @@ export const TrackCarousel = ({ tracks, onCollect, hasCollected, toggleDrawer }:
           <CarouselItem key={index} id="carousel-item" className="flex flex-col justify-between">
             <TrackDisplay 
               track={currentTrack} 
-              isActive={index === 0} 
               isMobile={true} 
               toggleDrawer={toggleDrawer}
             />
