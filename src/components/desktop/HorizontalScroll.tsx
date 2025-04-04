@@ -1,7 +1,7 @@
 import { motion, useScroll, useAnimate, useTransform } from "framer-motion";
 import { useRef, useLayoutEffect, useState, useEffect } from "react";
 import { tracks } from "../../data/tracks";
-import { TrackDisplay } from "./TrackDisplay";
+import { TrackDisplay } from "../common/TrackDisplay";
 
 
 export const HorizontalScroll = () => {

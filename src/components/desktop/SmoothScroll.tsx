@@ -7,7 +7,7 @@ import {
   useSpring
 } from "framer-motion"
 import { tracks } from "../../data/tracks";
-import { TrackDisplay } from "./TrackDisplay";
+import { TrackDisplay } from "../common/TrackDisplay";
 
 export const SmoothScroll = () => {
   const containerRef = useRef<HTMLDivElement>(null)

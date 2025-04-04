@@ -2,14 +2,40 @@ import { useState, useEffect, useRef, useCallback, MouseEvent } from 'react';
 import { motion } from "framer-motion";
 import { useAudioPlayer } from "react-use-audio-player";
 import { Track } from '../../types';
-import { TrackInfoLinks } from '../common/TrackInfoLinks';
-import { LinkIcon } from '../common/LinkIcon';
+import { TrackInfoLinks } from './TrackInfoLinks';
+import { LinkIcon } from './LinkIcon';
+import { formatTime } from '@/utils/timeFormat';
 
 interface TrackDisplayProps {
   track: Track;
   isMobile: boolean;
   toggleDrawer: () => void;
 }
+
+interface YouTubeProps {
+  videoId: string;
+  title: string;
+  className?: string;
+}
+
+const YouTube: React.FC<YouTubeProps> = ({ videoId, title, className }) => {
+  return (
+    <div id="youtube-round-embed-wrap" className={`relative aspect-square overflow-hidden rounded-full h-[280px] ${className}`}>
+      <div id="youtube-round-embed" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[200%] h-[200%] overflow-hidden">
+        <iframe
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full"
+          src={`https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1&playsinline=1`}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
+      </div>
+    </div>
+  );
+};
+
 
 const CoverArt = ({ src, alt }: { src: string; alt: string }) => (
   <>
@@ -25,29 +51,21 @@ const CoverArt = ({ src, alt }: { src: string; alt: string }) => (
   </>
 )
 
+const TrackTimeTracker = ({ audioPosition, duration }: { audioPosition: number; duration: number }) => (
+  <div className="flex items-center justify-between">
+    <div id="track-time-tracking" className="text-sm text-gray-400">
+      {formatTime(audioPosition)} / {formatTime(duration)}
+    </div>
+  </div>
+)
+
 export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProps) => {
   const { togglePlayPause, seek, getPosition, play, pause, isPlaying, duration } = useAudioPlayer(track.audioFile);
   const [audioPosition, setAudioPosition] = useState(0);
   const frameRef = useRef<number>()
   const seekbarRef = useRef<HTMLDivElement>(null);
-  // const { savedProgress, saveProgress } = useTrackProgress(track.id);
-
-  // useEffect(() => {
-  //   if (savedProgress > 0 && audioRef.current) {
-  //     audioRef.current.currentTime = savedProgress;
-  //   }
-  // }, [savedProgress]);
-
-  // useEffect(() => {
-  //   if (audioState.currentTime > 0) {
-  //     saveProgress(audioState.currentTime);
-  //   }
-  // }, [audioState.currentTime]);
 
   useEffect(() => {
-    // if (getPosition() > 0) {
-    //   setAudioPosition(getPosition());
-    // }
     const animate = () => {
       setAudioPosition(getPosition())
       frameRef.current = requestAnimationFrame(animate)
@@ -61,11 +79,6 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
       }
     }
   }, [getPosition])
-
-  const handlePlayPause = (event: MouseEvent) => {
-    event.preventDefault()
-    togglePlayPause();
-  }
 
   // Code borrowed from react-use-audio-player repo (AudioSeekBar.tsx)
   const goTo = useCallback(
@@ -92,7 +105,6 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
     track.id == 99 ? toggleDrawer() : null;
     pause(); // pause track on leaving
   }
-  // if (duration === Infinity) console.log("oh no duration is infinity");
 
   return (
     <motion.div 
@@ -108,39 +120,46 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
       {track.id == 99 ? (
         <CoverArt src={track.coverArt} alt={`Artwork for ${track.title}`} />
       ) : (
-        <motion.div id="cover-art-audio-player" className="w-full md:max-w-[500px] md:pr-8 mb-4 md:mb-0">
+        <motion.div id="cover-art-audio-player" className="w-full rounded-[999px] md:max-w-[500px] md:pr-8 mb-4 md:mb-0">
           <div className="relative w-full">
-            <motion.img
-              id="cover-art-img"
-              src={track.coverArt}
-              alt={`Artwork for ${track.title}`}
-              className="w-full rounded-full md:rounded-none shadow-2xl"
-              initial={{ rotate: 0 }}
-              whileInView={{ 
-                rotate: (isMobile ? 360 : 0),
-                transition: isMobile ? { duration: 200, repeat: Infinity, ease: [.17,.67,.83,.67] } : {}
-              }}
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-            />
-            {isMobile && (
+            {isMobile ? (
+              <YouTube 
+                videoId="A-OwYdNIfrw"
+                title="YouTube video player"
+                className="w-full rounded-full max-w-[400px] max-h-[280px] mx-auto shadow-lg"
+              />
+            ) : (
+              <motion.img
+                id="cover-art-img"
+                src={track.coverArt}
+                alt={`Artwork for ${track.title}`}
+                className="w-full rounded-full md:rounded-none shadow-2xl"
+                initial={{ rotate: 0 }}
+                whileInView={{ 
+                  rotate: (isMobile ? 360 : 0),
+                  transition: isMobile ? { duration: 200, repeat: Infinity, ease: [.17,.67,.83,.67] } : {}
+                }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              />
+            )}
+            {/* {isMobile && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <button 
                   className="w-28 h-28 rounded-full bg-[#cbcbcbba] text-black flex items-center justify-center text-xl"
-                  onClick={handlePlayPause}
+                  onClick={togglePlayPause}
                 >
                   {isPlaying ? '⏸' : '▶'}
                 </button>
               </div>
-            )}
+            )} */}
           </div>
           {/* Mobile Audio Progress Bar */}
-          {isMobile && (
+          {/* {isMobile && (
             <>
             <div 
               id="new-track-progress-bar"
               className="flex-1 h-2 bg-gray-600 rounded-full cursor-pointer"
-              // className="block absolute w-[288px] h-[288px] overflow-hidden rounded-[125px] bg-gray-600 cursor-pointer"
               ref={seekbarRef}
               onClick={goTo}
             >
@@ -149,13 +168,9 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
                 style={{ width: `${(audioPosition / duration) * 100}%` }}
               />
             </div>
-            {/* <div className="flex items-center justify-between">
-              <div id="track-time-tracking" className="text-sm text-gray-400">
-                {formatTime(audioPosition)} / {formatTime(duration)}
-              </div>
-            </div> */}
+            <TrackTimeTracker audioPosition={audioPosition} duration={duration} />
             </>
-          )}
+          )} */}
         </motion.div>
       )}
 
@@ -198,12 +213,12 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
         {(track.id == 99) && (
           <TrackInfoLinks />
         )}
-
+        <div className="w-full h-16 text-2xl text-center flex items-center justify-center font-bold">
+          <h2>{track.title}</h2>
+        </div>
         {/* BEN Audio Player */}
         {(!isMobile && track.id != 99) && (
           <div id="track-player" className="mt-4">
-            {/* <audio ref={audioRef} src={track.audioFile} /> */}
-            
             <div className="flex gap-4 justify-between items-center bg-gray-800 rounded-lg p-4">
               <div id="track-play-button" className="flex items-center justify-between">
                 <button
@@ -226,11 +241,7 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <div id="track-time-tracking" className="text-sm text-gray-400">
-                  {formatTime(audioPosition)} / {formatTime(duration)}
-                </div>
-              </div>
+              <TrackTimeTracker audioPosition={audioPosition} duration={duration} />
             </div>
           </div>
         )} 
@@ -238,11 +249,4 @@ export const TrackDisplay = ({ track, isMobile, toggleDrawer }: TrackDisplayProp
       </div>
     </motion.div>
   );
-};
-
-// Helper function to format time in MM:SS
-const formatTime = (seconds: number): string => {
-  const mins = Math.floor(seconds / 60);
-  const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 };

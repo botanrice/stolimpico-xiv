@@ -4,7 +4,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel"
 import { Track } from "@/types"
-import { TrackDisplay } from '../desktop/TrackDisplay';
+import { TrackDisplay } from '../common/TrackDisplay';
 import Collect from "../ui/collect";
 
 interface TrackCarouselProps {
@@ -19,7 +19,7 @@ export const TrackCarousel = ({ tracks, onCollect, hasCollected, toggleDrawer }:
     <Carousel id="carousel" className="w-full max-w-xs" opts={{ align: "center", "loop": true}}>
       <CarouselContent id="carousel-content">
         {tracks.map((currentTrack, index) => (
-          <CarouselItem key={index} id="carousel-item" className="flex flex-col justify-between">
+          <CarouselItem key={index} id="carousel-item" className="flex flex-col justify-center">
             <TrackDisplay 
               track={currentTrack} 
               isMobile={true} 

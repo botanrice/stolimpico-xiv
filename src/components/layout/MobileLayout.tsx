@@ -18,7 +18,7 @@ export const MobileLayout = () => {
   // };
 
   return (
-    <div id="mobile-layout" className="GradientBkg flex flex-col justify-between items-center w-screen h-screen pt-6 bg-black text-white overflow-hidden">
+    <div id="mobile-layout" className="GradientBkg flex flex-col justify-between items-center w-screen h-screen bg-black text-white overflow-hidden">
       {/* <motion.div 
         className="text-white text-xs italic mb-2"
         initial={{ opacity: 1 }}
